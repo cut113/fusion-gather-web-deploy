@@ -1,3 +1,4 @@
+import Register from 'components/auth/Register'
 import MainLayout from 'layouts/MainLayout'
 import Blog from 'pages/blog/Blog'
 import Home from 'pages/Home'
@@ -29,6 +30,10 @@ function App() {
     {
       path: '/user/:id',
       element: <UserController />
+    },
+    {
+      path: '/register',
+      element: <Register />
     }
   ])
   // <Router>
