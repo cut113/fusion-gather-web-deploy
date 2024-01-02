@@ -2,14 +2,28 @@
 
 import CountDown from "@/component/CountDown";
 import Button from "@/component/ui/Button";
-import { useRef, useState } from "react";
-import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
+import { handleCheckCodeAction, handleVerifyCodeAction } from "@/libs/actions";
+import { useRouter } from "next/navigation";
+import React, { ChangeEvent, useRef, useState } from "react";
+import { Controller, FieldValues, SubmitHandler, useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import { FaArrowLeftLong } from "react-icons/fa6"
 
-const VerifyCode = () => {
+interface Props {
+    accountInfo: string;
+    onSuccess?: () => void;
+    type: string
+}
+
+const VerifyCode = ({ onSuccess, accountInfo, type }: Props) => {
+    const router = useRouter()
     const [isLoading, setIsLoading] = useState<boolean>(false)
+    const [isCountdownRunning, setIsCountdownRunning] = useState<boolean>(true);
+    const inputRefs = useRef([...Array(6)].map(() => React.createRef<HTMLInputElement>()));
+    console.log("check :", accountInfo);
 
-    const inputRefs = useRef<Array<HTMLInputElement | null>>([])
-    const { register, handleSubmit, formState: { errors } } = useForm<FieldValues>({
+
+    const { handleSubmit, control } = useForm<FieldValues>({
         defaultValues: {
             number1: '',
             number2: '',
@@ -22,35 +36,52 @@ const VerifyCode = () => {
 
 
     const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-
         setIsLoading(true)
-        console.log(">>>check data: ", data);
-
         const code = Object.keys(data)
             .sort()
             .map((key) => data[key])
             .join('');
-        console.log(">>>check Verification code:", code);
+        try {
+            if (type === "reset") {
+                const res = await handleCheckCodeAction(accountInfo, code)
+                if (res) {
+                    setIsCountdownRunning(false);
+                    onSuccess!()
+                } else {
+                    toast.error('Failed!')
+                }
+            } else if (type === "verifyCode") {
+                const res = await handleVerifyCodeAction(accountInfo, code)
+                console.log(">>>check Verification code:", res);
+                if (res.status === 404) {
+                    toast.error(res?.message)
+                } else {
+                    setIsCountdownRunning(false);
+                    toast.success('Verified!')
+                    router.push('/login')
+                }
+            }
+        } catch (error: any) {
+            console.log(error);
 
-        //call api verify
+        } finally {
+            setIsLoading(false)
+        }
     }
-
-    //auto focus next input
-    // const handleKeyUp = (index: number, event: any) => {
-    //     if (event.target.value.length === 1 && index < inputRefs.current.length - 1) {
-    //         inputRefs.current[index + 1]!.focus();
-    //     }
-    // }
 
 
     return (
         <form
             onSubmit={handleSubmit(onSubmit)}
-            className="flex flex-col gap-6 items-center"
+            className="flex flex-col gap-6 items-center relative"
         >
+            <div
+                className="absolute left-0 top-1 cursor-pointer">
+                <FaArrowLeftLong size="28px" />
+            </div>
             <div className="flex flex-col items-center justify-center gap-5">
                 <h3 className="text-3xl font-bold">Code Verification</h3>
-                <span className="font-medium text-lg text-seconary">
+                <span className="font-medium text-lg text-secondary">
                     Enter the verification code we just sent on your email address.
                 </span>
             </div>
@@ -59,22 +90,33 @@ const VerifyCode = () => {
             </span>
             <div className="flex gap-5">
                 {[...Array(6)].map((_, index) => (
-                    <input
+                    <Controller
                         key={index}
-                        type="text"
-                        maxLength={1}
-                        autoComplete="off"
-                        {...register(`number${index}`, { required: true })}
-                        name={`number${index}`}
-                        className="w-[43px] h-[43px] border-2 outline-none border-black rounded-md text-center font-bold text-2xl"
-                    // ref={(el) => (inputRefs.current[index] = el)}
-                    // onKeyUp={(event) => handleKeyUp(index, event)}
+                        name={`number${index + 1}`}
+                        control={control}
+                        defaultValue=""
+                        render={({ field, fieldState }) => (
+                            <input
+                                {...field}
+                                maxLength={1}
+                                autoComplete="off"
+                                className="w-[43px] h-[43px] border-2 outline-none border-black rounded-md text-center font-bold text-2xl"
+                                autoFocus={index === 0}
+                                ref={inputRefs.current[index]}
+                                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                                    field.onChange(e);
+                                    if (e.target.value !== '' && index < 5) {
+                                        inputRefs.current[index + 1].current!.focus();
+                                    }
+                                }}
+                            />
+                        )}
                     />
                 ))}
             </div>
-            <div className="flex gap-1 text-seconary text-sm mb-10">
+            <div className="flex gap-1 text-secondary text-sm mb-10">
                 <span>The email will be resent in </span>
-                <CountDown currentTime="00:59" />
+                <CountDown currentTime="00:59" isRunning={isCountdownRunning} />
             </div>
 
             <div className="w-full">

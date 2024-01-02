@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Roboto } from 'next/font/google'
 import './globals.css'
 import AuthContext from '@/context/AuthContext'
+import { Toaster } from 'react-hot-toast'
 
 const roboto = Roboto({
   weight: ['400', '700'],
@@ -31,6 +32,14 @@ export default function RootLayout({
     <html lang="en">
       <body className={roboto.className}>
         <AuthContext>
+          <Toaster
+            toastOptions={{
+              style: {
+                background: 'rgb(51 65 85',
+                color: '#fff'
+              }
+            }}
+          />
           {children}
         </AuthContext>
       </body>

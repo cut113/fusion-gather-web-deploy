@@ -50,9 +50,6 @@ export const authOptions: NextAuthOptions = {
                         "Content-Type": "application/json",
                     }
                 })
-                if (res.status === 400) {
-                    throw new Error('Invalid credentials');
-                }
 
                 return await res.json()
             }

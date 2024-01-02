@@ -22,18 +22,7 @@ const Button: React.FC<ButtonProps> = ({
             onClick={onClick}
             type={type}
             disabled={disabled}
-            className={`
-                        flex 
-                        justify-center 
-                        rounded-md 
-                        px-3 
-                        py-4
-                        text-base 
-                        font-semibold 
-                        focus-visible:outline 
-                        focus-visible:outline-2 
-                        focus-visible:outline-offset-2
-                        border-2 border-black     
+            className={`flex justify-center rounded-md px-3 py-4 text-base font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 border-2 border-black hover:opacity-75    
                 ${disabled && 'opacity-50 cursor-default'}
                 ${fullWidth && 'w-full'}
                 ${secondary ? 'text-gray-300' : 'text-black'}

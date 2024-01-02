@@ -1,4 +1,3 @@
-import { log } from "console";
 import { Metadata } from "next";
 import LoginForm from "./component/LoginForm";
 
