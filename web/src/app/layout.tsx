@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
 import { Roboto } from 'next/font/google'
 import './globals.css'
-import AuthContext from '@/context/AuthContext'
 import { Toaster } from 'react-hot-toast'
+import { SessionProvider } from 'next-auth/react'
+import { auth } from '@/auth'
 
 const roboto = Roboto({
   weight: ['400', '700'],
@@ -23,15 +24,16 @@ export const metadata: Metadata = {
   }
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const session = await auth()
   return (
-    <html lang="en">
-      <body className={roboto.className}>
-        <AuthContext>
+    <SessionProvider session={session}>
+      <html lang="en">
+        <body className={roboto.className}>
           <Toaster
             toastOptions={{
               style: {
@@ -41,8 +43,8 @@ export default function RootLayout({
             }}
           />
           {children}
-        </AuthContext>
-      </body>
-    </html>
+        </body>
+      </html>
+    </SessionProvider>
   )
 }
