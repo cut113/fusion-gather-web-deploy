@@ -85,7 +85,7 @@ const LoginForm = () => {
                     </Link>
                     <div className="flex gap-1 items-center justify-center text-base px-2">
                         <span>
-                            Don't have an account?
+                            Don&apos;t have an account?
                         </span>
                         <Link
                             className="cursor-pointer font-semibold text-black hover:opacity-75"

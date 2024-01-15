@@ -55,7 +55,7 @@ const ResetPasswordForm = ({ onSuccess, accountInfo }: Props) => {
                 <div className="flex flex-col items-center justify-center gap-5">
                     <h3 className="text-3xl font-bold">Reset your password</h3>
                     <span className="font-medium text-lg text-center text-secondary">
-                        Don't worry! It occurs. Please enter the email address linked with your account.
+                        Don&apos;t worry! It occurs. Please enter the email address linked with your account.
                     </span>
                 </div>
 
