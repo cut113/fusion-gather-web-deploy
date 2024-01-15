@@ -3,16 +3,24 @@
 import Button from "@/component/ui/Button";
 import Input from "@/component/ui/Input";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { FcGoogle } from 'react-icons/fc'
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LoginSchema } from "@/libs/validation/auth";
+import { signIn } from "@/auth";
+import { LoginAction } from "@/libs/actions/login";
+import toast from "react-hot-toast";
+import { useRouter, useSearchParams } from "next/navigation";
+import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 
 const LoginForm = () => {
-    const [isLoading, setIsLoading] = useState<boolean>(false)
+    const router = useRouter()
+    const [isPending, startTransition] = useTransition()
+    const searchParams = useSearchParams()
+    const callbackUrl = searchParams.get("callbackUrl")
 
-    const { register, handleSubmit, formState: { errors } } = useForm<FieldValues>({
+    const { register, handleSubmit, formState: { errors }, reset } = useForm<FieldValues>({
         defaultValues: {
             username: '',
             password: '',
@@ -21,11 +29,20 @@ const LoginForm = () => {
     })
 
     const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-        setIsLoading(true)
-
-        //call api login
+        startTransition(() => {
+            LoginAction(data).then((data) => {
+                if (data?.error) {
+                    reset()
+                    toast.error(data.error)
+                } else {
+                    reset()
+                    router.push(`${callbackUrl ? callbackUrl : DEFAULT_LOGIN_REDIRECT}`)
+                    toast.success("LoggedIn!")
+                }
+            }).catch(() => toast.error(errors))
+        })
     }
-
+    //"Somthing went wrong!"
     return (
         <>
             <form
@@ -56,13 +73,13 @@ const LoginForm = () => {
                 <Input
                     id="username"
                     label="Username"
-                    disabled={isLoading}
+                    disabled={isPending}
                     register={register}
                     errors={errors}
                     required
                 />
                 <Input
-                    disabled={isLoading}
+                    disabled={isPending}
                     register={register}
                     errors={errors}
                     required
@@ -72,8 +89,8 @@ const LoginForm = () => {
                 />
 
                 <div className="w-full">
-                    <Button disabled={isLoading} fullWidth type="submit">
-                        {isLoading ? 'loading...' : 'Sign in'}
+                    <Button disabled={isPending} fullWidth type="submit">
+                        {isPending ? 'loading...' : 'Sign in'}
                     </Button>
                 </div>
 
