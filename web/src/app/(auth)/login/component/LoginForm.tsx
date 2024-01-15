@@ -39,7 +39,7 @@ const LoginForm = () => {
                     router.push(`${callbackUrl ? callbackUrl : DEFAULT_LOGIN_REDIRECT}`)
                     toast.success("LoggedIn!")
                 }
-            }).catch(() => toast.error(errors))
+            }).catch(() => toast.error(data.error))
         })
     }
     //"Somthing went wrong!"
